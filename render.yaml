@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: forshe-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 22.0.0
+      - key: PORT
+        value: 4000
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: VINOTH_PASSWORD
+        sync: false
+      - key: ISHWARYA_PASSWORD
+        sync: false
+    disk:
+      name: forshe-db
+      mountPath: /data
+      sizeGB: 1

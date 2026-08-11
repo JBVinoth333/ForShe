@@ -3,8 +3,11 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
 
-// Ensure data directory exists
-const dataDir = path.join(__dirname, '..', 'data');
+// Use /data (Render persistent disk) in production, local data/ in dev
+const dataDir = process.env.RENDER
+  ? '/data'
+  : path.join(__dirname, '..', 'data');
+
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
