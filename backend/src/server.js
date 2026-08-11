@@ -14,7 +14,10 @@ const app = express();
 const httpServer = http.createServer(app);
 
 const PORT = process.env.PORT || 4000;
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+// Allow multiple origins: local dev + GitHub Pages
+const ALLOWED_ORIGINS = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
+  .split(',')
+  .map((o) => o.trim());
 
 // ─── Security middleware ──────────────────────────────────────────────────────
 app.use(
@@ -25,7 +28,12 @@ app.use(
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const corsOptions = {
-  origin: CLIENT_ORIGIN,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    return callback(new Error(`CORS blocked: ${origin}`));
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -76,5 +84,5 @@ registerSocketHandlers(io);
 httpServer.listen(PORT, () => {
   console.log(`\n🚀  ForShe backend running on http://localhost:${PORT}`);
   console.log(`📡  Socket.IO ready`);
-  console.log(`🔒  CORS allowed for: ${CLIENT_ORIGIN}\n`);
+  console.log(`🔒  CORS allowed for: ${ALLOWED_ORIGINS.join(', ')}\n`);
 });
